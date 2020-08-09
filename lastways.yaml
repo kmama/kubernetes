@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: lastways
+  name: lastways
+  namespace: gameserver
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: lastways
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: lastways
+    spec:
+      containers:
+        - image: gcr.io/last-ways-42583848/github_kmama_kubernetes
+          imagePullPolicy: IfNotPresent
+          name: lastways-1
+---
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    app: lastways
+  name: lastways-hpa-kcnv
+  namespace: gameserver
+spec:
+  maxReplicas: 5
+  metrics:
+    - resource:
+        name: cpu
+        targetAverageUtilization: 80
+      type: Resource
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+
+
